@@ -3,14 +3,14 @@ Tests for MyToken contract
 """
 
 import pytest
-from moccasin.boa_tools import VyperContract
+from src import MyToken
 import boa
 
 
 def test_token_deployment(owner, alice):
     """Test basic token deployment"""
     # Deploy token
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Check token metadata
     assert token.name() == "Workshop Token"
@@ -26,7 +26,7 @@ def test_token_deployment(owner, alice):
 
 def test_transfer(owner, alice, bob):
     """Test token transfers"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Transfer tokens from owner to alice
     transfer_amount = 1000 * 10**18
@@ -51,7 +51,7 @@ def test_transfer(owner, alice, bob):
 
 def test_approve_and_transfer_from(owner, alice, bob):
     """Test approval and transferFrom mechanism"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Owner approves alice to spend tokens
     approval_amount = 500 * 10**18
@@ -76,7 +76,7 @@ def test_approve_and_transfer_from(owner, alice, bob):
 
 def test_mint_as_owner(owner, alice):
     """Test minting new tokens (owner only)"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Get initial supply
     initial_supply = token.totalSupply()
@@ -92,16 +92,16 @@ def test_mint_as_owner(owner, alice):
 
 def test_mint_as_non_owner_fails(owner, alice):
     """Test that non-owners cannot mint"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Alice tries to mint (should fail)
-    with boa.reverts("ownable: caller is not the owner"):
+    with boa.reverts("erc20: access is denied"):
         token.mint(alice, 1000 * 10**18, sender=alice)
 
 
 def test_burn(owner, alice):
     """Test burning tokens"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Transfer some tokens to alice first
     transfer_amount = 1000 * 10**18
@@ -120,7 +120,7 @@ def test_burn(owner, alice):
 
 def test_cannot_burn_more_than_balance(alice):
     """Test that users cannot burn more than they have"""
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     # Alice has no tokens, tries to burn
     with boa.reverts():

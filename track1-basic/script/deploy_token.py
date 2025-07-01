@@ -3,8 +3,7 @@
 Deploy MyToken to the specified network
 """
 
-from boa.contracts.abi.abi_contract import ABIContractFactory
-from moccasin.boa_tools import VyperContract
+from src import MyToken
 import os
 import json
 
@@ -14,7 +13,7 @@ def deploy():
     print("🚀 Deploying MyToken...")
     
     # Deploy the contract
-    token = VyperContract("track1-basic/src/MyToken.vy")
+    token = MyToken.deploy()
     
     print(f"✅ MyToken deployed at: {token.address}")
     print(f"   Name: {token.name()}")
@@ -32,13 +31,13 @@ def deploy():
     }
     
     # Create deployments directory if it doesn't exist
-    os.makedirs("track1-basic/deployments", exist_ok=True)
+    os.makedirs("deployments", exist_ok=True)
     
     # Save deployment info
-    with open("track1-basic/deployments/MyToken.json", "w") as f:
+    with open("deployments/MyToken.json", "w") as f:
         json.dump(deployment_info, f, indent=2)
     
-    print(f"\n💾 Deployment info saved to track1-basic/deployments/MyToken.json")
+    print(f"\n💾 Deployment info saved to deployments/MyToken.json")
     
     return token
 
