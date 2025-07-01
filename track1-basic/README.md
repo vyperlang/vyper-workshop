@@ -15,7 +15,7 @@ Snekmate provides battle-tested, gas-optimized implementations of common smart c
 First, install the snekmate dependency:
 
 ```bash
-cd /home/charles/vyper-workshop
+cd /path/to/track1-basic
 mox install
 ```
 
@@ -39,7 +39,7 @@ anvil
 Then deploy your token:
 
 ```bash
-mox run track1-basic/script/deploy_token.py --network anvil
+mox run deploy_token --network anvil --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
 ### 4. Interact with Your Token
@@ -86,7 +86,7 @@ print(f"Your balance: {balance / 10**18} tokens")
 Test your token implementation:
 
 ```bash
-mox test track1-basic/tests/test_token.py -v
+mox test tests/test_token.py -v
 ```
 
 ## Key Learning Points
@@ -98,8 +98,8 @@ mox test track1-basic/tests/test_token.py -v
 
 ## Exercises
 
-1. **Add a Minting Function**: Modify the token to allow the owner to mint new tokens
-2. **Add Burn Functionality**: Allow token holders to burn their tokens
+1. **Understand Module Exports**: The ERC20 module already includes mint and burn functions. Explore how they work
+2. **Access Control**: Add custom admin functions that don't conflict with the ERC20 exports
 3. **Create a Faucet**: Create a separate contract that distributes tokens to users
 
 ## Next Steps
