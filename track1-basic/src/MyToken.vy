@@ -14,7 +14,6 @@ from snekmate.auth import ownable
 implements: IERC20
 implements: IERC20Detailed
 
-
 # We initialize the modules we're using
 initializes: ownable
 initializes: erc20[ownable := ownable]
