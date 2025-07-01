@@ -1,0 +1,12 @@
+[project]
+src = "src"
+out = "out"
+
+[dependencies]
+snekmate = "^0.1.0"
+
+[networks.anvil]
+url = "http://127.0.0.1:8545"
+prompt_live = false
+save_to_db = true
+chain_id = 31337

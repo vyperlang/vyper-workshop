@@ -1,0 +1,69 @@
+# Example: Simultaneous condition evaluation + constant propagation
+# This demonstrates why SCCP is more powerful than simple constant folding
+# The key is that SCCP tracks relationships between variables across the CFG
+
+function simultaneous_propagation(n: uint256) -> uint256 {
+  entry:
+    %i = 1              # I = 1
+    %counter = 0        # loop counter
+    jmp loop_header
+
+  loop_header:
+    # Check loop condition (simulate while loop)
+    %cond = lt %counter, %n
+    jnz %cond, loop_body, loop_exit
+
+  loop_body:
+    %j = %i             # J = I
+    
+    # Simulate I = f(...) - let's say f adds 10 to counter
+    %temp1 = add %counter, 10
+    %i_new = %temp1     # I = f(...)
+    
+    # The key optimization: if (J > 0) I = J
+    # SCCP knows that J = I (the old value)
+    # Since I was initialized to 1 and only gets assigned positive values,
+    # J > 0 is always true
+    %zero = 0
+    %j_positive = gt %j, %zero
+    jnz %j_positive, assign_j, skip_assign
+
+  assign_j:
+    # This branch is always taken
+    # SCCP knows %j equals the old %i value
+    %i_final = %j       # I = J (restores old I value)
+    jmp continue
+
+  skip_assign:
+    # Dead code - SCCP can eliminate this
+    %i_final = %i_new
+    jmp continue
+
+  continue:
+    # Update loop counter
+    %counter_new = add %counter, 1
+    
+    # Prepare for next iteration
+    %i = %i_final
+    %counter = %counter_new
+    jmp loop_header
+
+  loop_exit:
+    # SCCP can determine that %i is always 1
+    return %i
+}
+
+# The insight: Even though there's complex control flow and I gets 
+# reassigned through f(), SCCP can track that:
+# 1. J always equals I (before f() call)
+# 2. I starts at 1 
+# 3. J > 0 is always true
+# 4. Therefore I = J always executes, restoring I to its previous value
+# 5. Since I starts at 1, it remains 1 throughout
+
+# After SCCP optimization:
+function simultaneous_propagation_optimized(n: uint256) -> uint256 {
+  entry:
+    %result = 1
+    return %result
+}

@@ -1,0 +1,96 @@
+# Complex SCCP example in raw Venom IR
+# This shows a pattern where constant propagation through 
+# multiple basic blocks creates optimization opportunities
+# that are hard to spot and optimize by hand
+
+# Function with complex control flow and constant propagation
+function sccp_complex() -> uint256 {
+  entry:
+    # Initialize constants
+    %1 = 100        # constant a
+    %2 = 50         # constant b
+    %3 = 25         # constant c
+    
+    # First computation
+    %4 = add %1, %2      # 150
+    %5 = mul %3, 2       # 50
+    
+    # Branch based on constant comparison
+    %6 = gt %4, %5       # 150 > 50 = 1 (true)
+    jnz %6, path_a, path_b
+
+  path_a:
+    # This path is always taken (SCCP knows %6 = 1)
+    %7 = sub %4, %5      # 150 - 50 = 100
+    %8 = div %7, 2       # 100 / 2 = 50
+    
+    # Another branch
+    %9 = eq %8, %2       # 50 == 50 = 1 (true)
+    jnz %9, path_c, path_d
+
+  path_b:
+    # Dead code - SCCP eliminates this
+    %10 = mul %1, %3     # Would be 2500
+    %11 = add %10, 1000  # Would be 3500
+    jmp merge_1
+
+  path_c:
+    # This path is taken (SCCP knows %9 = 1)
+    %12 = mul %8, 3      # 50 * 3 = 150
+    %13 = add %12, %1    # 150 + 100 = 250
+    
+    # Complex arithmetic
+    %14 = sub %13, %4    # 250 - 150 = 100
+    %15 = div %14, 4     # 100 / 4 = 25
+    
+    # Check if we should loop back
+    %16 = lt %15, %3     # 25 < 25 = 0 (false)
+    jnz %16, loop_back, continue
+
+  path_d:
+    # Dead code - SCCP eliminates this
+    %17 = 999
+    jmp merge_1
+
+  loop_back:
+    # Dead code - SCCP knows %16 = 0
+    %18 = add %15, 10
+    jmp path_c
+
+  continue:
+    # SCCP knows %15 = 25
+    %19 = mul %15, 4     # 25 * 4 = 100
+    %20 = add %19, %2    # 100 + 50 = 150
+    
+    # Final computation
+    %21 = eq %20, %4     # 150 == 150 = 1 (true)
+    jnz %21, final_a, final_b
+
+  final_a:
+    # This is taken
+    %22 = 42  # Return magic number
+    jmp merge_2
+
+  final_b:
+    # Dead code
+    %23 = 0
+    jmp merge_2
+
+  merge_1:
+    # This block is actually unreachable!
+    %24 = phi path_b %11, path_d %17
+    %25 = add %24, 1
+    jmp merge_2
+
+  merge_2:
+    # SCCP determines only %22 can reach here
+    %result = phi final_a %22, final_b %23, merge_1 %25
+    return %result  # Always returns 42
+}
+
+# After SCCP optimization, this entire function becomes:
+# function sccp_complex() -> uint256 {
+#   entry:
+#     %1 = 42
+#     return %1
+# }
