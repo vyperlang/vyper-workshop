@@ -6,8 +6,14 @@
 """
 
 from ethereum.ercs import IERC20
+from ethereum.ercs import IERC20Detailed
+
 from snekmate.tokens import erc20
 from snekmate.auth import ownable
+
+implements: IERC20
+implements: IERC20Detailed
+
 
 # We initialize the modules we're using
 initializes: ownable
