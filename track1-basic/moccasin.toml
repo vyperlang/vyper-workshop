@@ -1,9 +1,7 @@
 [project]
 src = "src"
 out = "out"
-
-[dependencies]
-snekmate = "^0.1.0"
+dependencies = ["snekmate"]
 
 [networks.anvil]
 url = "http://127.0.0.1:8545"
