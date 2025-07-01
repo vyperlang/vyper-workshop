@@ -65,6 +65,6 @@ def algebraic_identities(x: uint256, y: uint256) -> uint256:
     f: uint256 = x | 0      # -> x
     
     # Subtraction creating NOT
-    g: uint256 = (2**256 - 1) - x  # -> ~x (bitwise NOT)
+#g: uint256 = (2**256 - 1) - x  # -> ~x (bitwise NOT)
     
-    return a + b + c + d + e + f + g
+    return a + b + c + d + e + f

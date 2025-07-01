@@ -21,24 +21,7 @@ def deploy():
     print(f"   Decimals: {token.decimals()}")
     print(f"   Total Supply: {token.totalSupply() / 10**18:,.0f} {token.symbol()}")
     
-    # Save deployment info
-    deployment_info = {
-        "address": token.address,
-        "name": token.name(),
-        "symbol": token.symbol(),
-        "decimals": token.decimals(),
-        "totalSupply": str(token.totalSupply())
-    }
-    
-    # Create deployments directory if it doesn't exist
-    os.makedirs("deployments", exist_ok=True)
-    
-    # Save deployment info
-    with open("deployments/MyToken.json", "w") as f:
-        json.dump(deployment_info, f, indent=2)
-    
-    print(f"\n💾 Deployment info saved to deployments/MyToken.json")
-    
+   
     return token
 
 

@@ -2,16 +2,16 @@
 # This demonstrates why SCCP is more powerful than simple constant folding
 # The key is that SCCP tracks relationships between variables across the CFG
 
-function simultaneous_propagation(n: uint256) -> uint256 {
+function simultaneous_propagation {
   entry:
     %i = 1              # I = 1
     %counter = 0        # loop counter
-    jmp loop_header
+    jmp @loop_header
 
   loop_header:
     # Check loop condition (simulate while loop)
-    %cond = lt %counter, %n
-    jnz %cond, loop_body, loop_exit
+    %cond = lt %counter, 10
+    jnz %cond, @loop_body, @loop_exit
 
   loop_body:
     %j = %i             # J = I
@@ -26,18 +26,18 @@ function simultaneous_propagation(n: uint256) -> uint256 {
     # J > 0 is always true
     %zero = 0
     %j_positive = gt %j, %zero
-    jnz %j_positive, assign_j, skip_assign
+    jnz %j_positive, @assign_j, @skip_assign
 
   assign_j:
     # This branch is always taken
     # SCCP knows %j equals the old %i value
     %i_final = %j       # I = J (restores old I value)
-    jmp continue
+    jmp @continue
 
   skip_assign:
     # Dead code - SCCP can eliminate this
     %i_final = %i_new
-    jmp continue
+    jmp @continue
 
   continue:
     # Update loop counter
@@ -46,11 +46,12 @@ function simultaneous_propagation(n: uint256) -> uint256 {
     # Prepare for next iteration
     %i = %i_final
     %counter = %counter_new
-    jmp loop_header
+    jmp @loop_header
 
   loop_exit:
     # SCCP can determine that %i is always 1
-    return %i
+    mstore 32, %i
+    return 32, 32
 }
 
 # The insight: Even though there's complex control flow and I gets 
@@ -62,8 +63,9 @@ function simultaneous_propagation(n: uint256) -> uint256 {
 # 5. Since I starts at 1, it remains 1 throughout
 
 # After SCCP optimization:
-function simultaneous_propagation_optimized(n: uint256) -> uint256 {
-  entry:
-    %result = 1
-    return %result
-}
+
+# function simultaneous_propagation_optimized(n: uint256) -> uint256 {
+#  entry:
+#    %result = 1
+#    return %result
+#}
